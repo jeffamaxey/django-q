@@ -24,9 +24,7 @@ class Sqs(Broker):
 
     def dequeue(self):
         # sqs supports max 10 messages in bulk
-        if Conf.BULK > 10:
-            Conf.BULK = 10
-
+        Conf.BULK = min(Conf.BULK, 10)
         params = {"MaxNumberOfMessages": Conf.BULK, "VisibilityTimeout": Conf.RETRY}
 
         # sqs long polling
@@ -41,10 +39,9 @@ class Sqs(Broker):
                 raise ValueError(
                     "receive_message_wait_time_seconds is invalid. Reason: Must be >= 0 and <= 20"
                 )
-            params.update({"WaitTimeSeconds": wait_time_second})
+            params["WaitTimeSeconds"] = wait_time_second
 
-        tasks = self.queue.receive_messages(**params)
-        if tasks:
+        if tasks := self.queue.receive_messages(**params):
             return [(t.receipt_handle, t.body) for t in tasks]
 
     def acknowledge(self, task_id):

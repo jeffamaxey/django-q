@@ -69,9 +69,7 @@ class Task(models.Model):
     @staticmethod
     def delete_group(group_id, objects=False):
         group = Task.objects.filter(group=group_id)
-        if objects:
-            return group.delete()
-        return group.update(group=None)
+        return group.delete() if objects else group.update(group=None)
 
     def group_delete(self, tasks=False):
         if self.group:

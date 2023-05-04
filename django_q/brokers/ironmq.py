@@ -11,8 +11,9 @@ class IronMQBroker(Broker):
 
     def dequeue(self):
         timeout = Conf.RETRY or None
-        tasks = self.connection.get(timeout=timeout, wait=1, max=Conf.BULK)["messages"]
-        if tasks:
+        if tasks := self.connection.get(timeout=timeout, wait=1, max=Conf.BULK)[
+            "messages"
+        ]:
             return [(t["id"], t["body"]) for t in tasks]
 
     def ping(self) -> bool:

@@ -19,7 +19,7 @@ import sys
 import alabaster
 
 myPath = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, myPath + '/../')
+sys.path.insert(0, f'{myPath}/../')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'django_q.tests.settings'
 nitpick_ignore = [('py:class', 'datetime')]
 

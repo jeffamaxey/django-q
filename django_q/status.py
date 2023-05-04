@@ -88,8 +88,7 @@ class Stat(Status):
         """
         if not broker:
             broker = get_broker()
-        pack = broker.get_stat(Stat.get_key(cluster_id))
-        if pack:
+        if pack := broker.get_stat(Stat.get_key(cluster_id)):
             try:
                 return SignedPackage.loads(pack)
             except BadSignature:

@@ -62,10 +62,9 @@ class Mongo(Broker):
         return str(inserted_id)
 
     def dequeue(self):
-        task = self.collection.find_one_and_update(
+        if task := self.collection.find_one_and_update(
             {"lock": {"$lte": _timeout()}}, {"$set": {"lock": timezone.now()}}
-        )
-        if task:
+        ):
             return [(str(task["_id"]), task["payload"])]
         # empty queue, spare the cpu
         sleep(Conf.POLL)

@@ -15,10 +15,7 @@ def multiply(x, y):
 
 
 def count_letters(tup):
-    total = 0
-    for word in tup:
-        total += len(word)
-    return total
+    return sum(len(word) for word in tup)
 
 
 def count_letters2(obj):

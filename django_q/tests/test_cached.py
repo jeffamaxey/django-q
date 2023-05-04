@@ -42,7 +42,7 @@ def test_cached(broker):
     async_task("math.copysign", 1, -1, cached=True, broker=broker, group=group)
     async_task("math.copysign", 1, -1, cached=True, broker=broker, group=group)
     async_task("math.popysign", 1, -1, cached=True, broker=broker, group=group)
-    iter_id = async_iter("math.floor", [i for i in range(10)], cached=True)
+    iter_id = async_iter("math.floor", list(range(10)), cached=True)
     # test wait on cache
     # test wait timeout
     assert result(task_id, wait=10, cached=True) is None
@@ -57,7 +57,7 @@ def test_cached(broker):
     task_queue = Queue()
     stop_event = Event()
     stop_event.set()
-    for i in range(task_count):
+    for _ in range(task_count):
         pusher(task_queue, stop_event, broker=broker)
     assert broker.queue_size() == 0
     assert task_queue.qsize() == task_count
@@ -95,7 +95,7 @@ def test_cached(broker):
 def test_iter(broker):
     broker.purge_queue()
     broker.cache.clear()
-    it = [i for i in range(10)]
+    it = list(range(10))
     it2 = [(1, -1), (2, -1), (3, -4), (5, 6)]
     it3 = (1, 2, 3, 4, 5)
     t = async_iter("math.floor", it, sync=True)

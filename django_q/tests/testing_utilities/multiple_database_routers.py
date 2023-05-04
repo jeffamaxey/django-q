@@ -28,11 +28,7 @@ class TestingMultipleAppsDatabaseRouter:
         return model._meta.app_label in ["admin"]
 
     def db_for_read(self, model, **hints):
-        if self.is_admin(model):
-            return "admin"
-        return "default"
+        return "admin" if self.is_admin(model) else "default"
 
     def db_for_write(self, model, **hints):
-        if self.is_admin(model):
-            return "admin"
-        return "default"
+        return "admin" if self.is_admin(model) else "default"

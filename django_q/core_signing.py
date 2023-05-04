@@ -48,11 +48,11 @@ class Signer(Sgnr):
     def unsign(self, signed_value):
         signed_value = force_str(signed_value)
         if self.sep not in signed_value:
-            raise BadSignature('No "%s" found in value' % self.sep)
+            raise BadSignature(f'No "{self.sep}" found in value')
         value, sig = signed_value.rsplit(self.sep, 1)
         if constant_time_compare(sig, self.signature(value)):
             return force_str(value)
-        raise BadSignature('Signature "%s" does not match' % sig)
+        raise BadSignature(f'Signature "{sig}" does not match')
 
 
 """
@@ -76,5 +76,5 @@ class TimestampSigner(Signer, TsS):
             # Check timestamp is not older than max_age
             age = time.time() - timestamp
             if age > max_age:
-                raise SignatureExpired("Signature age %s > %s seconds" % (age, max_age))
+                raise SignatureExpired(f"Signature age {age} > {max_age} seconds")
         return value

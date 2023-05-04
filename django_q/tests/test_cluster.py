@@ -11,7 +11,7 @@ import pytest
 from django.utils import timezone
 
 myPath = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, myPath + "/../")
+sys.path.insert(0, f"{myPath}/../")
 
 from django_q.brokers import Broker, get_broker
 from django_q.cluster import Cluster, Sentinel, monitor, pusher, save_task, worker
@@ -555,6 +555,7 @@ def test_update_failed(broker):
 
 @pytest.mark.django_db
 def test_acknowledge_failure_override():
+
     class VerifyAckMockBroker(Broker):
         def __init__(self, *args, **kwargs):
             super(VerifyAckMockBroker, self).__init__(*args, **kwargs)
@@ -580,22 +581,20 @@ def test_acknowledge_failure_override():
     }
 
     tag = uuid()
-    task_fail_no_ack = task_fail_ack.copy()
-    task_fail_no_ack.update(
-        {"id": tag[1], "name": tag[0], "ack_id": "test_fail_no_ack_id"}
-    )
+    task_fail_no_ack = task_fail_ack | {
+        "id": tag[1],
+        "name": tag[0],
+        "ack_id": "test_fail_no_ack_id",
+    }
     del task_fail_no_ack["ack_failure"]
 
     tag = uuid()
-    task_success_ack = task_fail_ack.copy()
-    task_success_ack.update(
-        {
-            "id": tag[1],
-            "name": tag[0],
-            "ack_id": "test_success_ack_id",
-            "success": True,
-        }
-    )
+    task_success_ack = task_fail_ack | {
+        "id": tag[1],
+        "name": tag[0],
+        "ack_id": "test_success_ack_id",
+        "success": True,
+    }
     del task_success_ack["ack_failure"]
 
     result_queue = Queue()
@@ -626,7 +625,7 @@ class TestSignals:
 
         pre_enqueue.connect(handler)
         task_id = async_task("math.copysign", 1, -1, broker=broker)
-        assert self.signal_was_called is True
+        assert self.signal_was_called
         assert self.task.get("id") == task_id
         pre_enqueue.disconnect(handler)
         broker.delete_queue()
@@ -656,7 +655,7 @@ class TestSignals:
         result_queue.put("STOP")
         monitor(result_queue, broker)
         broker.delete_queue()
-        assert self.signal_was_called is True
+        assert self.signal_was_called
         assert self.task.get("id") == task_id
         assert self.func == copysign
         pre_execute.disconnect(handler)
@@ -685,7 +684,7 @@ class TestSignals:
         result_queue.put("STOP")
         monitor(result_queue, broker)
         broker.delete_queue()
-        assert self.signal_was_called is True
+        assert self.signal_was_called
         assert self.task.get("id") == task_id
         assert self.task.get("result") == -1
         post_execute.disconnect(handler)

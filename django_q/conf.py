@@ -28,6 +28,8 @@ except ModuleNotFoundError:
     resource = None
 
 
+
+
 class Conf:
     """
     Configuration class
@@ -100,12 +102,7 @@ class Conf:
             # in rare cases this might fail
         except NotImplementedError:
             # try psutil
-            if psutil:
-                WORKERS = psutil.cpu_count() or 4
-            else:
-                # sensible default
-                WORKERS = 4
-
+            WORKERS = psutil.cpu_count() or 4 if psutil else 4
     # Option to undaemonize the workers and allow them to spawn child processes
     DAEMONIZE_WORKERS = conf.get("daemonize_workers", True)
 
@@ -186,11 +183,11 @@ class Conf:
         QSIZE = False
 
     # Getting the signal names
-    SIGNAL_NAMES = dict(
-        (getattr(signal, n), n)
+    SIGNAL_NAMES = {
+        getattr(signal, n): n
         for n in dir(signal)
         if n.startswith("SIG") and "_" not in n
-    )
+    }
 
     # Translators: Cluster status descriptions
     STARTING = _("Starting")
@@ -201,6 +198,7 @@ class Conf:
 
     # to manage workarounds during testing
     TESTING = conf.get("testing", False)
+
 
 
 # logger
@@ -223,7 +221,7 @@ class ErrorReporter:
 
     # initialize with iterator of reporters (better name, targets?)
     def __init__(self, reporters):
-        self.targets = [target for target in reporters]
+        self.targets = list(reporters)
 
     # report error to all configured targets
     def report(self):

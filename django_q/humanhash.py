@@ -343,8 +343,7 @@ class HumanHasher:
 
         # Use a simple XOR checksum-like function for compression.
         checksum = lambda bytes: reduce(operator.xor, bytes, 0)
-        checksums = list(map(checksum, segments))
-        return checksums
+        return list(map(checksum, segments))
 
     def uuid(self, **params):
 

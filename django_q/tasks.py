@@ -143,8 +143,7 @@ def result(task_id, wait=0, cached=Conf.CACHED):
         return result_cached(task_id, wait)
     start = time()
     while True:
-        r = Task.get_result(task_id)
-        if r:
+        if r := Task.get_result(task_id):
             return r
         if (time() - start) * 1000 >= wait >= 0:
             break
@@ -159,8 +158,7 @@ def result_cached(task_id, wait=0, broker=None):
         broker = get_broker()
     start = time()
     while True:
-        r = broker.cache.get(f"{broker.list_key}:{task_id}")
-        if r:
+        if r := broker.cache.get(f"{broker.list_key}:{task_id}"):
             return SignedPackage.loads(r)["result"]
         if (time() - start) * 1000 >= wait >= 0:
             break
@@ -190,8 +188,7 @@ def result_group(group_id, failures=False, wait=0, count=None, cached=Conf.CACHE
                 break
             sleep(0.01)
     while True:
-        r = Task.get_result_group(group_id, failures)
-        if r:
+        if r := Task.get_result_group(group_id, failures):
             return r
         if (time() - start) * 1000 >= wait >= 0:
             break
@@ -215,8 +212,9 @@ def result_group_cached(group_id, failures=False, wait=0, count=None, broker=Non
                 break
             sleep(0.01)
     while True:
-        group_list = broker.cache.get(f"{broker.list_key}:{group_id}:keys")
-        if group_list:
+        if group_list := broker.cache.get(
+            f"{broker.list_key}:{group_id}:keys"
+        ):
             result_list = []
             for task_key in group_list:
                 task = SignedPackage.loads(broker.cache.get(task_key))
@@ -244,8 +242,7 @@ def fetch(task_id, wait=0, cached=Conf.CACHED):
         return fetch_cached(task_id, wait)
     start = time()
     while True:
-        t = Task.get_task(task_id)
-        if t:
+        if t := Task.get_task(task_id):
             return t
         if (time() - start) * 1000 >= wait >= 0:
             break
@@ -260,8 +257,7 @@ def fetch_cached(task_id, wait=0, broker=None):
         broker = get_broker()
     start = time()
     while True:
-        r = broker.cache.get(f"{broker.list_key}:{task_id}")
-        if r:
+        if r := broker.cache.get(f"{broker.list_key}:{task_id}"):
             task = SignedPackage.loads(r)
             return Task(
                 id=task["id"],
@@ -302,8 +298,7 @@ def fetch_group(group_id, failures=True, wait=0, count=None, cached=Conf.CACHED)
                 break
             sleep(0.01)
     while True:
-        r = Task.get_task_group(group_id, failures)
-        if r:
+        if r := Task.get_task_group(group_id, failures):
             return r
         if (time() - start) * 1000 >= wait >= 0:
             break
@@ -327,8 +322,9 @@ def fetch_group_cached(group_id, failures=True, wait=0, count=None, broker=None)
                 break
             sleep(0.01)
     while True:
-        group_list = broker.cache.get(f"{broker.list_key}:{group_id}:keys")
-        if group_list:
+        if group_list := broker.cache.get(
+            f"{broker.list_key}:{group_id}:keys"
+        ):
             task_list = []
             for task_key in group_list:
                 task = SignedPackage.loads(broker.cache.get(task_key))
@@ -374,8 +370,7 @@ def count_group_cached(group_id, failures=False, broker=None):
     """
     if not broker:
         broker = get_broker()
-    group_list = broker.cache.get(f"{broker.list_key}:{group_id}:keys")
-    if group_list:
+    if group_list := broker.cache.get(f"{broker.list_key}:{group_id}:keys"):
         if not failures:
             return len(group_list)
         failure_count = 0
@@ -470,15 +465,11 @@ def async_chain(chain, group=None, cached=Conf.CACHED, sync=Conf.SYNC, broker=No
     """
     if not group:
         group = uuid()[1]
-    args = ()
-    kwargs = {}
     task = chain.pop(0)
     if type(task) is not tuple:
         task = (task,)
-    if len(task) > 1:
-        args = task[1]
-    if len(task) > 2:
-        kwargs = task[2]
+    args = task[1] if len(task) > 1 else ()
+    kwargs = task[2] if len(task) > 2 else {}
     kwargs["chain"] = chain
     kwargs["group"] = group
     kwargs["cached"] = cached
@@ -630,9 +621,7 @@ class Chain:
         get the index of the currently executing chain element
         :return int: current chain index
         """
-        if not self.started:
-            return None
-        return count_group(self.group, cached=self.cached)
+        return count_group(self.group, cached=self.cached) if self.started else None
 
     def length(self):
         """

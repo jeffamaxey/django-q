@@ -131,8 +131,7 @@ class Broker:
             return []
         stats = []
         for key in key_list:
-            stat = self.cache.get(key)
-            if stat:
+            if stat := self.cache.get(key):
                 stats.append(stat)
             else:
                 key_list.remove(key)

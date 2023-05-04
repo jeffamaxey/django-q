@@ -37,7 +37,7 @@ def monitor(run_once=False, broker=None):
         broker = get_broker()
     term = Terminal()
     broker.ping()
-    with term.fullscreen(), term.hidden_cursor(), term.cbreak():
+    with (term.fullscreen(), term.hidden_cursor(), term.cbreak()):
         val = None
         start_width = int(term.width / 8)
         while val not in (
@@ -150,8 +150,7 @@ def monitor(run_once=False, broker=None):
             # bottom bar
             i += 1
             queue_size = broker.queue_size()
-            lock_size = broker.lock_size()
-            if lock_size:
+            if lock_size := broker.lock_size():
                 queue_size = f"{queue_size}({lock_size})"
             print(
                 term.move(i, 0)
@@ -304,7 +303,7 @@ def memory(run_once=False, workers=False, broker=None):
             )
         )
         return
-    with term.fullscreen(), term.hidden_cursor(), term.cbreak():
+    with (term.fullscreen(), term.hidden_cursor(), term.cbreak()):
         MEMORY_AVAILABLE_LOWEST_PERCENTAGE = 100.0
         MEMORY_AVAILABLE_LOWEST_PERCENTAGE_AT = timezone.now()
         cols = 8
@@ -434,11 +433,13 @@ def memory(run_once=False, workers=False, broker=None):
                 )
                 for worker_num in range(Conf.WORKERS):
                     print(
-                        term.move(row, (worker_num + 1) * col_width)
-                        + term.black_on_cyan(
-                            term.center(
-                                "Worker #{} (MB)".format(worker_num + 1),
-                                width=col_width - 1,
+                        (
+                            term.move(row, (worker_num + 1) * col_width)
+                            + term.black_on_cyan(
+                                term.center(
+                                    f"Worker #{worker_num + 1} (MB)",
+                                    width=col_width - 1,
+                                )
                             )
                         )
                     )
@@ -473,9 +474,7 @@ def memory(run_once=False, workers=False, broker=None):
 
 
 def get_ids():
-    # prints id (PID) of running clusters
-    stat = Stat.get_all()
-    if stat:
+    if stat := Stat.get_all():
         for s in stat:
             print(s.cluster_id)
     else:

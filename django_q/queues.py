@@ -78,4 +78,4 @@ class Queue(multiprocessing.queues.Queue):
 
     def empty(self) -> bool:
         """Reliable implementation of multiprocessing.Queue.empty()"""
-        return not self.qsize() > 0
+        return self.qsize() <= 0

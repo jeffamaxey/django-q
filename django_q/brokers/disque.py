@@ -19,10 +19,9 @@ class Disque(Broker):
         ).decode()
 
     def dequeue(self):
-        tasks = self.connection.execute_command(
+        if tasks := self.connection.execute_command(
             f"GETJOB COUNT {Conf.BULK} TIMEOUT 1000 FROM {self.list_key}"
-        )
-        if tasks:
+        ):
             return [(t[1].decode(), t[2].decode()) for t in tasks]
 
     def queue_size(self):

@@ -18,8 +18,7 @@ class Redis(Broker):
         return self.connection.rpush(self.list_key, task)
 
     def dequeue(self):
-        task = self.connection.blpop(self.list_key, 1)
-        if task:
+        if task := self.connection.blpop(self.list_key, 1):
             return [(None, task[1])]
 
     def queue_size(self):
@@ -52,8 +51,7 @@ class Redis(Broker):
             return self.connection.get(key)
 
     def get_stats(self, pattern: str):
-        keys = self.connection.keys(pattern=pattern)
-        if keys:
+        if keys := self.connection.keys(pattern=pattern):
             return self.connection.mget(keys)
 
     @staticmethod

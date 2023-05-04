@@ -421,8 +421,7 @@ def worker(
         # Get the function from the task
         logger.info(_(f'{name} processing [{task["name"]}]'))
         f = task["func"]
-        # if it's not an instance try to get it from the string
-        if not callable(task["func"]):
+        if not callable(f):
             f = pydoc.locate(f)
         close_old_django_connections()
         timer_value = task.pop("timeout", timeout)
@@ -583,7 +582,7 @@ def scheduler(broker: Broker = None):
         broker = get_broker()
     close_old_django_connections()
     try:
-        database_to_use = {"using": Conf.ORM} if not Conf.HAS_REPLICA else {}
+        database_to_use = {} if Conf.HAS_REPLICA else {"using": Conf.ORM}
         with db.transaction.atomic(**database_to_use):
             for s in (
                 Schedule.objects.select_for_update()
@@ -725,7 +724,7 @@ def set_cpu_affinity(n: int, process_ids: list, actual: bool = not Conf.TESTING)
     index = 0
     for pid in process_ids:
         affinity = []
-        for k in range(n):
+        for _ in range(n):
             if index == len(cpu_list):
                 index = 0
             affinity.append(cpu_list[index])
@@ -748,6 +747,4 @@ def rss_check():
 
 def localtime() -> datetime:
     """Override for timezone.localtime to deal with naive times and local times"""
-    if settings.USE_TZ:
-        return timezone.localtime()
-    return datetime.now()
+    return timezone.localtime() if settings.USE_TZ else datetime.now()
